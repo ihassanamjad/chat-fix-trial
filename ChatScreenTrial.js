@@ -164,15 +164,16 @@ export default function ChatScreenTrial() {
    * Problem: When a message sends successfully, it's adding BOTH the old optimistic message AND the new acked message, creating duplicates.
    * Solution: Used functional update to get the current messages array, found the optimistic message and replaced it with the acked one.
    */
-  const sendMessage = () => {
-    if (!inputText.trim()) return;
+  const sendMessage = (textToSend) => {
+    const text = textToSend || inputText;
+    if (!text.trim()) return;
 
     const clientId = makeId("cli");
     /** @type {Message} */
     const optimistic = {
       id: makeId("tmp"),
       clientId,
-      text: inputText,
+      text: text,  // Use the text variable, not inputText
       sender: "me",
       timestamp: Date.now(),
       status: "sending",
@@ -181,7 +182,11 @@ export default function ChatScreenTrial() {
     setMessages((prevMessages) => [...prevMessages, optimistic]);
 
     setStats((prevStats) => ({ ...prevStats, sends: prevStats.sends + 1 }));
-    setInputText("");
+    
+    // Only clear input if we're not using a parameter
+    if (!textToSend) {
+      setInputText("");
+    }
 
     mock
       .send({ clientId, text: optimistic.text })
@@ -219,10 +224,14 @@ export default function ChatScreenTrial() {
     setInputText(cleanText);
   };
 
+  /**
+   * Problem: setInputText doesn't update immediately, so all 10 sendMessage() calls read the same old inputText value.
+   * Solution: Added a text parameter to sendMessage() to avoid the race condition.
+   */
   const spamSend = (n = 10) => {
+    const timestamp = new Date().toLocaleTimeString();
     for (let i = 0; i < n; i++) {
-      setInputText(`Spam ${i + 1} @ ${new Date().toLocaleTimeString()}`);
-      sendMessage();
+      sendMessage(`Spam ${i + 1} @ ${timestamp}`);
     }
   };
 

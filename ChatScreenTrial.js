@@ -123,9 +123,16 @@ export default function ChatScreenTrial() {
     };
   }, []);
 
+  /**
+   * Problem: Saving to AsyncStorage on every keystroke is wasteful.
+   * Solution: Removed inputText from dependncies and only saved after initial hydration to avoid race condition.
+   */
+  
   useEffect(() => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(() => {});
-  }, [messages, inputText]);
+    if (hydrated) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(() => {});
+    }
+  }, [messages, hydrated]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (nextState) => {

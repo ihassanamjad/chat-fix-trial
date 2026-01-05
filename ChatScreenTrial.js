@@ -258,7 +258,7 @@ export default function ChatScreenTrial() {
           <Button title="Spam 10" onPress={() => spamSend(10)} />
         </View>
         <Text style={styles.sub}>
-          {hydrated ? "Hydrated" : "Hydrating..."} • renders: {stats.renders} • sends:{" "}
+          {hydrated ? "Hydrated" : "Hydrating..."} • renders: {renderCountRef.current} • sends:{" "}
           {stats.sends} • fails: {stats.fails}
         </Text>
       </View>

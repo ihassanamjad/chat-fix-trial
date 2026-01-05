@@ -269,11 +269,14 @@ export default function ChatScreenTrial() {
           {stats.sends} • fails: {stats.fails}
         </Text>
       </View>
+    
+    {/* Problem: Using index as key causes rendering bugs when list changes.
+    Solution: Used item.clientId which is unique and stable */}
 
       <FlatList
         data={sortedMessages}
         renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.clientId}
         contentContainerStyle={styles.listContent}
       />
 

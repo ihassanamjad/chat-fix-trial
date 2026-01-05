@@ -141,6 +141,10 @@ export default function ChatScreenTrial() {
 
   const sortedMessages = messages.sort((a, b) => a.timestamp - b.timestamp);
 
+  /**
+   * Problem: When a message sends successfully, it's adding BOTH the old optimistic message AND the new acked message, creating duplicates.
+   * Solution: Used functional update to get the current messages array, found the optimistic message and replaced it with the acked one.
+   */
   const sendMessage = () => {
     if (!inputText.trim()) return;
 
@@ -155,9 +159,9 @@ export default function ChatScreenTrial() {
       status: "sending",
     };
 
-    setMessages([...messages, optimistic]);
+    setMessages((prevMessages) => [...prevMessages, optimistic]);
 
-    setStats({ ...stats, sends: stats.sends + 1 });
+    setStats((prevStats) => ({ ...prevStats, sends: prevStats.sends + 1 }));
     setInputText("");
 
     mock
@@ -169,14 +173,20 @@ export default function ChatScreenTrial() {
           timestamp: serverTimestamp,
           status: "sent",
         };
-        setMessages([...messages, optimistic, acked]);
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => (msg.clientId === clientId ? acked : msg))
+        );
       })
       .catch((err) => {
-        optimistic.status = "failed";
-        optimistic.text = `${optimistic.text} (${String(err.message || err)})`;
-
-        setStats({ ...stats, fails: stats.fails + 1 });
-        setMessages(messages);
+        const failed = {
+          ...optimistic,
+          status: "failed",
+          text: `${optimistic.text} (${String(err.message || err)})`,
+        };
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => (msg.clientId === clientId ? failed : msg))
+        );
+        setStats((prevStats) => ({ ...prevStats, fails: prevStats.fails + 1 }));
       });
   };
 

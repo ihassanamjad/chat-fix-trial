@@ -151,7 +151,14 @@ export default function ChatScreenTrial() {
     mock.setOffline(isOffline);
   }, [isOffline]);
 
-  const sortedMessages = messages.sort((a, b) => a.timestamp - b.timestamp);
+  /**
+   * Problem: Sorting the messages array on every render is wasteful.
+   * Solution: Used useMemo to memoize the sorted messages array to avoid unnecessary re-renders.
+   */
+  const sortedMessages = React.useMemo(
+    () => [...messages].sort((a, b) => a.timestamp - b.timestamp),
+    [messages]
+  );
 
   /**
    * Problem: When a message sends successfully, it's adding BOTH the old optimistic message AND the new acked message, creating duplicates.

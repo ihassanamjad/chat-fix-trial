@@ -190,10 +190,14 @@ export default function ChatScreenTrial() {
       });
   };
 
+  /**
+   * Problem: setInputText doesn't update immediately, so sendMessage() reads the old value.
+   * Solution: Used a local variable to get the clean text and set it to the new value.
+   */
   const retryMessage = (msg) => {
     if (msg.status !== "failed") return;
-    setInputText(msg.text.replace(/\s*\(.*\)\s*$/, ""));
-    sendMessage();
+    const cleanText = msg.text.replace(/\s*\(.*\)\s*$/, "");
+    setInputText(cleanText);
   };
 
   const spamSend = (n = 10) => {

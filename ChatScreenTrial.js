@@ -97,8 +97,13 @@ export default function ChatScreenTrial() {
 
   const appStateRef = useRef(AppState.currentState);
 
+  /**
+   * Problem: Directly mutating state object instead of using setState.
+   * Solution: Rendered counter (use ref to avoid triggering re-renders)
+   */
   // render counter
-  stats.renders += 1;
+  const renderCountRef = useRef(0);
+  renderCountRef.current++;
 
   useEffect(() => {
     let mounted = true;
